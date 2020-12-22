@@ -384,9 +384,6 @@ const renderSpreadsheetLine = (
     type: "line",
     x: x + BAR_GAP + BAR_WIDTH / 2,
     y: y - BAR_GAP,
-    // x: x + points[0][0],
-    // y: y + points[0][1],
-
     startArrowhead: null,
     endArrowhead: null,
     height: maxY - minY,
