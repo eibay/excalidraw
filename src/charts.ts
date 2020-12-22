@@ -405,7 +405,6 @@ const chartTypeLine = (
     endArrowhead: null,
     height: maxY - minY,
     width: maxX - minX,
-    strokeStyle: "solid",
     strokeWidth: 2,
     points: points as any,
   });
@@ -418,6 +417,7 @@ const chartTypeLine = (
       groupIds: [groupId],
       ...commonProps,
       fillStyle: "solid",
+      strokeWidth: 2,
       type: "ellipse",
       x: x + cx + BAR_WIDTH / 2,
       y: y + cy - BAR_GAP * 2,
