@@ -99,7 +99,7 @@ export type AppState = {
   fileHandle: import("browser-nativefs").FileSystemHandle | null;
   collaborators: Map<string, Collaborator>;
   showStats: boolean;
-  chartType: "bar";
+  chartType: "bar" | "line";
 };
 
 export type NormalizedZoomValue = number & { _brand: "normalizedZoom" };

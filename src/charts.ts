@@ -316,11 +316,11 @@ const chartBaseElements = (
     : null;
 
   return [
+    debugRect,
     title,
     ...chartXLabels(spreadsheet, x, y, groupId),
     ...chartYLabels(spreadsheet, x, y, groupId),
     ...chartLines(spreadsheet, x, y, groupId),
-    debugRect,
   ].filter((element) => element !== null) as ExcalidrawElement[];
 };
 
@@ -357,13 +357,84 @@ const renderSpreadsheetBar = (
   ];
 };
 
+const renderSpreadsheetLine = (
+  spreadsheet: Spreadsheet,
+  x: number,
+  y: number,
+): ExcalidrawElement[] => {
+  const max = Math.max(...spreadsheet.values);
+  const groupId = randomId();
+  let index = 0;
+  const points = [];
+  for (const value of spreadsheet.values) {
+    const cx = index * (BAR_WIDTH + BAR_GAP);
+    const cy = -(value / max) * BAR_HEIGHT;
+    points.push([cx, cy]);
+    index++;
+  }
+
+  const maxX = Math.max(...points.map((element) => element[0]));
+  const maxY = Math.max(...points.map((element) => element[1]));
+  const minX = Math.min(...points.map((element) => element[0]));
+  const minY = Math.min(...points.map((element) => element[1]));
+
+  const line = newLinearElement({
+    groupIds: [groupId],
+    ...commonProps,
+    type: "line",
+    x: x + BAR_GAP + BAR_WIDTH / 2,
+    y: y - BAR_GAP,
+    // x: x + points[0][0],
+    // y: y + points[0][1],
+
+    startArrowhead: null,
+    endArrowhead: null,
+    height: maxY - minY,
+    width: maxX - minX,
+    strokeStyle: "solid",
+    strokeWidth: 2,
+    points: points as any,
+  });
+
+  const bars = spreadsheet.values.map((value, index) => {
+    const barHeight = (value / max) * BAR_HEIGHT;
+    return newElement({
+      groupIds: [groupId],
+      ...commonProps,
+      type: "rectangle",
+      x: x + index * (BAR_WIDTH + BAR_GAP) + BAR_GAP,
+      y: y - barHeight - BAR_GAP,
+      width: BAR_WIDTH,
+      height: barHeight,
+      opacity: 30,
+    });
+  });
+
+  return [
+    ...bars,
+    ...chartBaseElements(
+      spreadsheet,
+      x,
+      y,
+      groupId,
+      process.env.NODE_ENV === ENV.DEVELOPMENT,
+    ),
+    line,
+  ];
+};
+
 export const renderSpreadsheet = (
   chartType: string,
   spreadsheet: Spreadsheet,
   x: number,
   y: number,
 ): ExcalidrawElement[] => {
-  const chart: ExcalidrawElement[] = renderSpreadsheetBar(spreadsheet, x, y);
+  let chart: ExcalidrawElement[];
+  if (chartType === "line") {
+    chart = renderSpreadsheetLine(spreadsheet, x, y);
+  } else {
+    chart = renderSpreadsheetBar(spreadsheet, x, y);
+  }
   trackEvent(EVENT_MAGIC, "chart", chartType, spreadsheet.values.length);
   return chart;
 };
