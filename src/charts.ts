@@ -426,6 +426,31 @@ const chartTypeLine = (
     });
   });
 
+  const linesId = randomId();
+  const lines = spreadsheet.values.map((value, index) => {
+    const cx = index * (BAR_WIDTH + BAR_GAP) + BAR_GAP / 2;
+    const cy = -(value / max) * BAR_HEIGHT + BAR_GAP / 2;
+    return newLinearElement({
+      backgroundColor,
+      groupIds: [groupId, linesId],
+      ...commonProps,
+      type: "line",
+      x: x + cx + BAR_WIDTH / 2 + BAR_GAP / 2,
+      y: y - BAR_GAP,
+      startArrowhead: null,
+      endArrowhead: null,
+      height: -cy,
+      width: 1,
+      strokeStyle: "dotted",
+      strokeWidth: 2,
+      opacity: 32,
+      points: [
+        [0, 0],
+        [0, cy],
+      ],
+    });
+  });
+
   return [
     ...chartBaseElements(
       spreadsheet,
@@ -436,6 +461,7 @@ const chartTypeLine = (
       process.env.NODE_ENV === ENV.DEVELOPMENT,
     ),
     line,
+    ...lines,
     ...dots,
   ];
 };
