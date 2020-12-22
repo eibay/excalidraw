@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { CHART_LABELS } from "../charts";
 import { getCommonBounds } from "../element/bounds";
 import { NonDeletedExcalidrawElement } from "../element/types";
 import {
@@ -74,6 +75,12 @@ export const Stats = (props: {
               <td>{t("stats.height")}</td>
               <td>{Math.round(boundingBox[3]) - Math.round(boundingBox[1])}</td>
             </tr>
+            {props.appState.lastImportedChartTimestamp > 0 && (
+              <tr>
+                <td>{t("labels.chartType")}</td>
+                <td>{t(CHART_LABELS[props.appState.chartType])}</td>
+              </tr>
+            )}
             <tr>
               <th colSpan={2}>{t("stats.storage")}</th>
             </tr>
