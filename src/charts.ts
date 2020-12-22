@@ -8,6 +8,7 @@ import { randomId } from "./random";
 const BAR_WIDTH = 32;
 const BAR_GAP = 12;
 const BAR_HEIGHT = 256;
+const GRID_OPACITY = 50;
 
 export interface Spreadsheet {
   title: string | null;
@@ -276,6 +277,7 @@ const chartLines = (
     endArrowhead: null,
     strokeStyle: "dotted",
     width: chartWidth,
+    opacity: GRID_OPACITY,
     points: [
       [0, 0],
       [chartWidth, 0],
@@ -394,11 +396,11 @@ const chartTypeLine = (
   const minX = Math.min(...points.map((element) => element[0]));
   const minY = Math.min(...points.map((element) => element[1]));
 
-  const line = newLinearElement({
+  const arrow = newLinearElement({
     backgroundColor,
     groupIds: [groupId],
     ...commonProps,
-    type: "line",
+    type: "arrow",
     x: x + BAR_GAP + BAR_WIDTH / 2,
     y: y - BAR_GAP,
     startArrowhead: null,
@@ -428,21 +430,19 @@ const chartTypeLine = (
 
   const lines = spreadsheet.values.map((value, index) => {
     const cx = index * (BAR_WIDTH + BAR_GAP) + BAR_GAP / 2;
-    const cy = -(value / max) * BAR_HEIGHT + BAR_GAP / 2;
+    const cy = (value / max) * BAR_HEIGHT + BAR_GAP / 2 + BAR_GAP;
     return newLinearElement({
       backgroundColor,
       groupIds: [groupId],
       ...commonProps,
       type: "line",
       x: x + cx + BAR_WIDTH / 2 + BAR_GAP / 2,
-      y: y - BAR_GAP,
+      y: y - cy,
       startArrowhead: null,
       endArrowhead: null,
-      height: -cy,
-      width: 1,
+      height: cy,
       strokeStyle: "dotted",
-      strokeWidth: 2,
-      opacity: 32,
+      opacity: GRID_OPACITY,
       points: [
         [0, 0],
         [0, cy],
@@ -459,7 +459,7 @@ const chartTypeLine = (
       backgroundColor,
       process.env.NODE_ENV === ENV.DEVELOPMENT,
     ),
-    line,
+    arrow,
     ...lines,
     ...dots,
   ];
