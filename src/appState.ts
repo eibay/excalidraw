@@ -75,6 +75,7 @@ export const getDefaultAppState = (): Omit<
     collaborators: new Map(),
     showStats: false,
     chartType: "line",
+    lastImportedChartTimestamp: 0,
   };
 };
 
@@ -154,6 +155,7 @@ const APP_STATE_STORAGE_CONF = (<
   collaborators: { browser: false, export: false },
   showStats: { browser: true, export: false },
   chartType: { browser: true, export: true },
+  lastImportedChartTimestamp: { browser: true, export: false },
 });
 
 const _clearAppStateForStorage = <ExportType extends "export" | "browser">(

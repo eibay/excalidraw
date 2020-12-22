@@ -100,6 +100,7 @@ export type AppState = {
   collaborators: Map<string, Collaborator>;
   showStats: boolean;
   chartType: "bar" | "line";
+  lastImportedChartTimestamp: number;
 };
 
 export type NormalizedZoomValue = number & { _brand: "normalizedZoom" };

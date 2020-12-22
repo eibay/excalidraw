@@ -124,6 +124,7 @@ import {
   MIME_TYPES,
   TAP_TWICE_TIMEOUT,
   TOUCH_CTX_MENU_TIMEOUT,
+  NEXT_CHART_TYPE_TIMEOUT,
 } from "../constants";
 
 import LayerUI from "./LayerUI";
@@ -1003,14 +1004,21 @@ class App extends React.Component<ExcalidrawProps, AppState> {
       if (data.errorMessage) {
         this.setState({ errorMessage: data.errorMessage });
       } else if (data.spreadsheet) {
+        const fastPaste = Date.now() - this.state.lastImportedChartTimestamp;
+        let nextChartType = this.state.chartType;
+        if (fastPaste < NEXT_CHART_TYPE_TIMEOUT) {
+          //TOOD: add all the types in an array and cycle through them
+          nextChartType = nextChartType === "bar" ? "line" : "bar";
+        }
+
         this.addElementsFromPasteOrLibrary(
-          renderSpreadsheet(
-            this.state.chartType,
-            data.spreadsheet,
-            cursorX,
-            cursorY,
-          ),
+          renderSpreadsheet(nextChartType, data.spreadsheet, cursorX, cursorY),
         );
+
+        this.setState({
+          chartType: nextChartType,
+          lastImportedChartTimestamp: Date.now(),
+        });
       } else if (data.elements) {
         this.addElementsFromPasteOrLibrary(data.elements);
       } else if (data.text) {
