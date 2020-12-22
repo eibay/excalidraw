@@ -150,7 +150,6 @@ const bgColors = colors.elementBackground.slice(
 // Put all the common properties here so when the whole chart is selected
 // the properties dialog shows the correct selected values
 const commonProps = {
-  backgroundColor: bgColors[Math.floor(Math.random() * bgColors.length)],
   fillStyle: "hachure",
   fontFamily: DEFAULT_FONT_FAMILY,
   fontSize: DEFAULT_FONT_SIZE,
@@ -175,11 +174,13 @@ const chartXLabels = (
   x: number,
   y: number,
   groupId: string,
+  backgroundColor: string,
 ): ExcalidrawElement[] => {
   return (
     spreadsheet.labels?.map((label, index) => {
       return newTextElement({
         groupIds: [groupId],
+        backgroundColor,
         ...commonProps,
         text: label.length > 8 ? `${label.slice(0, 5)}...` : label,
         x: x + index * (BAR_WIDTH + BAR_GAP) + BAR_GAP * 2,
@@ -199,9 +200,11 @@ const chartYLabels = (
   x: number,
   y: number,
   groupId: string,
+  backgroundColor: string,
 ): ExcalidrawElement[] => {
   const minYLabel = newTextElement({
     groupIds: [groupId],
+    backgroundColor,
     ...commonProps,
     x: x - BAR_GAP,
     y: y - BAR_GAP,
@@ -211,6 +214,7 @@ const chartYLabels = (
 
   const maxYLabel = newTextElement({
     groupIds: [groupId],
+    backgroundColor,
     ...commonProps,
     x: x - BAR_GAP,
     y: y - BAR_HEIGHT - minYLabel.height / 2,
@@ -226,9 +230,11 @@ const chartLines = (
   x: number,
   y: number,
   groupId: string,
+  backgroundColor: string,
 ): ExcalidrawElement[] => {
   const { chartWidth, chartHeight } = getChartDimentions(spreadsheet);
   const xLine = newLinearElement({
+    backgroundColor,
     groupIds: [groupId],
     ...commonProps,
     type: "line",
@@ -244,6 +250,7 @@ const chartLines = (
   });
 
   const yLine = newLinearElement({
+    backgroundColor,
     groupIds: [groupId],
     ...commonProps,
     type: "line",
@@ -259,6 +266,7 @@ const chartLines = (
   });
 
   const maxLine = newLinearElement({
+    backgroundColor,
     groupIds: [groupId],
     ...commonProps,
     type: "line",
@@ -283,12 +291,14 @@ const chartBaseElements = (
   x: number,
   y: number,
   groupId: string,
+  backgroundColor: string,
   debug?: boolean,
 ): ExcalidrawElement[] => {
   const { chartWidth, chartHeight } = getChartDimentions(spreadsheet);
 
   const title = spreadsheet.title
     ? newTextElement({
+        backgroundColor,
         groupIds: [groupId],
         ...commonProps,
         text: spreadsheet.title,
@@ -302,6 +312,7 @@ const chartBaseElements = (
 
   const debugRect = debug
     ? newElement({
+        backgroundColor,
         groupIds: [groupId],
         ...commonProps,
         type: "rectangle",
@@ -318,23 +329,25 @@ const chartBaseElements = (
   return [
     debugRect,
     title,
-    ...chartXLabels(spreadsheet, x, y, groupId),
-    ...chartYLabels(spreadsheet, x, y, groupId),
-    ...chartLines(spreadsheet, x, y, groupId),
+    ...chartXLabels(spreadsheet, x, y, groupId, backgroundColor),
+    ...chartYLabels(spreadsheet, x, y, groupId, backgroundColor),
+    ...chartLines(spreadsheet, x, y, groupId, backgroundColor),
   ].filter((element) => element !== null) as ExcalidrawElement[];
 };
 
-const renderSpreadsheetBar = (
+const chartTypeBar = (
   spreadsheet: Spreadsheet,
   x: number,
   y: number,
 ): ExcalidrawElement[] => {
   const max = Math.max(...spreadsheet.values);
   const groupId = randomId();
+  const backgroundColor = bgColors[Math.floor(Math.random() * bgColors.length)];
 
   const bars = spreadsheet.values.map((value, index) => {
     const barHeight = (value / max) * BAR_HEIGHT;
     return newElement({
+      backgroundColor,
       groupIds: [groupId],
       ...commonProps,
       type: "rectangle",
@@ -352,18 +365,21 @@ const renderSpreadsheetBar = (
       x,
       y,
       groupId,
+      backgroundColor,
       process.env.NODE_ENV === ENV.DEVELOPMENT,
     ),
   ];
 };
 
-const renderSpreadsheetLine = (
+const chartTypeLine = (
   spreadsheet: Spreadsheet,
   x: number,
   y: number,
 ): ExcalidrawElement[] => {
   const max = Math.max(...spreadsheet.values);
   const groupId = randomId();
+  const backgroundColor = bgColors[Math.floor(Math.random() * bgColors.length)];
+
   let index = 0;
   const points = [];
   for (const value of spreadsheet.values) {
@@ -379,6 +395,7 @@ const renderSpreadsheetLine = (
   const minY = Math.min(...points.map((element) => element[1]));
 
   const line = newLinearElement({
+    backgroundColor,
     groupIds: [groupId],
     ...commonProps,
     type: "line",
@@ -393,9 +410,25 @@ const renderSpreadsheetLine = (
     points: points as any,
   });
 
+  const dots = spreadsheet.values.map((value, index) => {
+    const cx = index * (BAR_WIDTH + BAR_GAP);
+    const cy = -(value / max) * BAR_HEIGHT;
+    return newElement({
+      backgroundColor,
+      groupIds: [groupId],
+      ...commonProps,
+      type: "ellipse",
+      x: x + cx + BAR_GAP,
+      y: y - cy - BAR_GAP,
+      width: BAR_GAP * 2,
+      height: BAR_GAP * 2,
+    });
+  });
+
   const bars = spreadsheet.values.map((value, index) => {
     const barHeight = (value / max) * BAR_HEIGHT;
     return newElement({
+      backgroundColor,
       groupIds: [groupId],
       ...commonProps,
       type: "rectangle",
@@ -414,9 +447,11 @@ const renderSpreadsheetLine = (
       x,
       y,
       groupId,
+      backgroundColor,
       process.env.NODE_ENV === ENV.DEVELOPMENT,
     ),
     line,
+    ...dots,
   ];
 };
 
@@ -428,9 +463,9 @@ export const renderSpreadsheet = (
 ): ExcalidrawElement[] => {
   let chart: ExcalidrawElement[];
   if (chartType === "line") {
-    chart = renderSpreadsheetLine(spreadsheet, x, y);
+    chart = chartTypeLine(spreadsheet, x, y);
   } else {
-    chart = renderSpreadsheetBar(spreadsheet, x, y);
+    chart = chartTypeBar(spreadsheet, x, y);
   }
   trackEvent(EVENT_MAGIC, "chart", chartType, spreadsheet.values.length);
   return chart;
