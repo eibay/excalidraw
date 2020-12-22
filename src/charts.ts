@@ -411,37 +411,22 @@ const chartTypeLine = (
   });
 
   const dots = spreadsheet.values.map((value, index) => {
-    const cx = index * (BAR_WIDTH + BAR_GAP);
-    const cy = -(value / max) * BAR_HEIGHT;
+    const cx = index * (BAR_WIDTH + BAR_GAP) + BAR_GAP / 2;
+    const cy = -(value / max) * BAR_HEIGHT + BAR_GAP / 2;
     return newElement({
       backgroundColor,
       groupIds: [groupId],
       ...commonProps,
+      fillStyle: "solid",
       type: "ellipse",
-      x: x + cx + BAR_GAP,
-      y: y - cy - BAR_GAP,
-      width: BAR_GAP * 2,
-      height: BAR_GAP * 2,
-    });
-  });
-
-  const bars = spreadsheet.values.map((value, index) => {
-    const barHeight = (value / max) * BAR_HEIGHT;
-    return newElement({
-      backgroundColor,
-      groupIds: [groupId],
-      ...commonProps,
-      type: "rectangle",
-      x: x + index * (BAR_WIDTH + BAR_GAP) + BAR_GAP,
-      y: y - barHeight - BAR_GAP,
-      width: BAR_WIDTH,
-      height: barHeight,
-      opacity: 30,
+      x: x + cx + BAR_WIDTH / 2,
+      y: y + cy - BAR_GAP * 2,
+      width: BAR_GAP,
+      height: BAR_GAP,
     });
   });
 
   return [
-    ...bars,
     ...chartBaseElements(
       spreadsheet,
       x,
